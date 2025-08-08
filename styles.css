@@ -1,0 +1,205 @@
+* 
+/* Base styles (desktop) - keep existing sidebar and main layout */
+
+/* Small devices (phones) in portrait mode */
+@media (max-width: 767px) and (orientation: portrait) {
+  body {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    justify-content: center;
+  }
+  .sidebar h1 {
+    flex-basis: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .sidebar label,
+  .sidebar input[type="file"],
+  .btn,
+  #instructionsBox,
+  #markerList,
+  h2 {
+    flex: 1 1 45%; /* roughly 2 columns */
+    margin: 5px;
+  }
+  #markerList {
+    flex-basis: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  main {
+    flex: 1;
+    width: 100%;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100%;
+  }
+}
+
+/* Small devices (phones) in landscape mode */
+@media (max-width: 767px) and (orientation: landscape) {
+  body {
+    flex-direction: row;
+  }
+  .sidebar {
+    width: 260px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+    border-bottom: none;
+  }
+  main {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  canvas {
+    max-width: 100%;
+    max-height: 100vh;
+  }
+}
+
+{
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f6f8;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+.sidebar {
+  background: white;
+  width: 260px;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar h1 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 28px;
+  text-align: center;
+  color: #333;
+}
+.sidebar label {
+  font-weight: 600;
+  margin-top: 10px;
+  display: block;
+}
+.sidebar input[type="file"],
+.sidebar textarea {
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+.sidebar textarea {
+  height: 70px;
+  resize: vertical;
+  padding: 6px;
+}
+.btn {
+  padding: 10px;
+  margin: 5px 0;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+  width: 100%;
+  font-size: 15px;
+}
+.btn:hover {
+  filter: brightness(85%);
+}
+.screw-btn {
+  background-color: #28a745;
+}
+.bolt-btn {
+  background-color: #dc3545;
+}
+.component-btn {
+  background-color: #007bff;
+}
+.custom-btn {
+  background-color: #ffc107;
+  color: #333;
+}
+.undo-btn {
+  background-color: #17a2b8; /* a nice blue */
+  margin-top: 10px;
+}
+.undo-btn:hover {
+  background-color: #117a8b;
+}
+.export-btn {
+  background-color: #6c757d;
+  margin-top: 15px;
+}
+#instructionsBox {
+  margin-top: 20px;
+}
+#addInstructionsBtn {
+  background-color: #007bff;
+  margin-top: 5px;
+}
+#addInstructionsBtn:hover {
+  background-color: #0056b3;
+}
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #e9ecef;
+  padding: 15px;
+  overflow: auto;
+}
+canvas {
+  border: 3px solid #333;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 100%;
+  height: auto;
+  cursor: crosshair;
+  user-select: none;
+}
+.marker-label {
+  position: absolute;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  color: white;
+  pointer-events: none;
+  user-select: none;
+  text-shadow: 0 0 3px rgba(0,0,0,0.7);
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  z-index: 10;
+}

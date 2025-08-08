@@ -1,241 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jonny Box</title>
-  <style>
-    body {
-      display: flex;
-      margin: 0;
-      font-family: sans-serif;
-    }
-    .sidebar {
-      width: 150px;
-      background: #f0f0f0;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .sidebar button {
-      padding: 8px;
-      border: none;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    #screwBtn { background: green; }
-    #boltBtn { background: red; }
-    #componentBtn { background: blue; }
-    #customBtn { background: goldenrod; }
-    #instructionsBtn { background: gray; }
-    #downloadBtn { background: purple; }
-    #loadBtn { background: teal; }
-    .main {
-      flex: 1;
-      padding: 10px;
-    }
-    canvas {
-      border: 1px solid #ccc;
-      cursor: crosshair;
-    }
-    ol {
-      padding-left: 20px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jonny Box - Disassembly Tracker</title>
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="sidebar">
-    <input type="file" id="upload" />
-    <input type="text" id="filename" placeholder="Filename" />
-    <button id="screwBtn">Screw</button>
-    <button id="boltBtn">Bolt</button>
-    <button id="componentBtn">Component</button>
-    <button id="customBtn">Custom</button>
-    <button id="instructionsBtn">Instructions</button>
-    <button id="downloadBtn">Download</button>
-    <button id="loadBtn">Load</button>
-    <ol id="markerList"></ol>
+    <h1>Jonny Box</h1>
+
+    <label for="uploadImage">Choose Image:</label>
+    <input type="file" id="uploadImage" accept="image/*" />
+
+    <label for="importFile">Load Project (JSON):</label>
+    <input type="file" id="importFile" accept=".json" />
+
+    <button class="btn screw-btn" data-mode="screw/nut (small)">Screw/Nut (Small)</button>
+    <button class="btn bolt-btn" data-mode="bolt">Bolt</button>
+    <button class="btn component-btn" data-mode="component">Component</button>
+    <button class="btn custom-btn" data-mode="custom">Custom</button>
+    <button class="btn undo-btn" id="undoBtn">Undo Last Step</button>
+    <button class="btn export-btn" id="exportBtn">Export Project</button>
+
+    <div id="instructionsBox">
+      <label for="instructionsInput">Add Instructions to Last Step:</label>
+      <textarea id="instructionsInput" placeholder="Type instructions here..."></textarea>
+      <button id="addInstructionsBtn">Add Instructions</button>
+    </div>
+
+    <h2>Steps</h2>
+    <ul id="markerList"></ul>
   </div>
-  <div class="main">
-    <canvas id="canvas"></canvas>
-  </div>
 
-  <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const upload = document.getElementById('upload');
-    const markerList = document.getElementById('markerList');
-    const instructionsBtn = document.getElementById('instructionsBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const loadBtn = document.getElementById('loadBtn');
-    const filenameInput = document.getElementById('filename');
+  <main>
+    <canvas id="canvas" width="800" height="600"></canvas>
+  </main>
 
-    let img = new Image();
-    let markers = [];
-    let currentMode = 'screw';
-    let isDrawing = false;
-    let path = [];
-
-    document.getElementById('screwBtn').onclick = () => currentMode = 'screw';
-    document.getElementById('boltBtn').onclick = () => currentMode = 'bolt';
-    document.getElementById('componentBtn').onclick = () => currentMode = 'component';
-    document.getElementById('customBtn').onclick = () => currentMode = 'custom';
-
-    instructionsBtn.onclick = () => {
-      if (markers.length === 0) return;
-      const last = markers[markers.length - 1];
-      const text = prompt('Enter instructions for this marker:', last.instructions || '');
-      if (text !== null) {
-        last.instructions = text;
-        renderList();
-        drawAllMarkers();
-      }
-    };
-
-    upload.onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          drawAllMarkers();
-        };
-        img.src = evt.target.result;
-      };
-      reader.readAsDataURL(file);
-    };
-
-    canvas.onmousedown = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      if (currentMode === 'screw' || currentMode === 'bolt') {
-        markers.push({
-          x, y, type: currentMode,
-          color: currentMode === 'screw' ? 'green' : 'red',
-          instructions: '',
-          number: markers.filter(m => m.type === currentMode).length + 1
-        });
-        drawAllMarkers();
-        renderList();
-      } else {
-        isDrawing = true;
-        path = [{ x, y }];
-      }
-    };
-
-    canvas.onmousemove = (e) => {
-      if (!isDrawing) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      path.push({ x, y });
-      drawAllMarkers();
-      drawCurrentPath();
-    };
-
-    canvas.onmouseup = () => {
-      if (!isDrawing || path.length < 2) return;
-      isDrawing = false;
-      const color = currentMode === 'component' ? 'blue' : 'goldenrod';
-      const number = markers.filter(m => m.type === currentMode).length + 1;
-      markers.push({
-        type: currentMode,
-        color,
-        number,
-        path: [...path],
-        instructions: ''
-      });
-      path = [];
-      drawAllMarkers();
-      renderList();
-    };
-
-    function drawAllMarkers() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-      markers.forEach(marker => {
-        ctx.strokeStyle = marker.color;
-        ctx.fillStyle = marker.color;
-        ctx.lineWidth = 2;
-        ctx.font = '14px sans-serif';
-
-        if (marker.type === 'screw' || marker.type === 'bolt') {
-          ctx.beginPath();
-          ctx.arc(marker.x, marker.y, 6, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = 'white';
-          ctx.fillText(marker.number, marker.x - 4, marker.y + 4);
-        } else if (marker.path) {
-          ctx.beginPath();
-          ctx.moveTo(marker.path[0].x, marker.path[0].y);
-          for (let i = 1; i < marker.path.length; i++) {
-            ctx.lineTo(marker.path[i].x, marker.path[i].y);
-          }
-          ctx.stroke();
-          const last = marker.path[marker.path.length - 1];
-          ctx.fillStyle = 'black';
-          ctx.fillText(marker.number, last.x + 4, last.y + 14);
-        }
-      });
-    }
-
-    function drawCurrentPath() {
-      if (path.length < 2) return;
-      ctx.strokeStyle = currentMode === 'component' ? 'blue' : 'goldenrod';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(path[0].x, path[0].y);
-      for (let i = 1; i < path.length; i++) {
-        ctx.lineTo(path[i].x, path[i].y);
-      }
-      ctx.stroke();
-    }
-
-    function renderList() {
-      markerList.innerHTML = '';
-      markers.forEach((m, i) => {
-        const li = document.createElement('li');
-        li.textContent = `Step ${i + 1}: ${m.type} ${m.number}${m.instructions ? ' - ' + m.instructions : ''}`;
-        markerList.appendChild(li);
-      });
-    }
-
-    downloadBtn.onclick = () => {
-      const filename = filenameInput.value.trim() || 'markers';
-      const blob = new Blob([JSON.stringify(markers)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${filename}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    };
-
-    loadBtn.onclick = () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'application/json';
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          markers = JSON.parse(evt.target.result);
-          drawAllMarkers();
-          renderList();
-        };
-        reader.readAsText(file);
-      };
-      input.click();
-    };
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
