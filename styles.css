@@ -1,96 +1,25 @@
-* 
-/* Base styles (desktop) - keep existing sidebar and main layout */
+/* Reset and base */
 
-/* Small devices (phones) in portrait mode */
-/* Portrait phones: buttons in a horizontal top bar */
-@media (max-width: 767px) and (orientation: portrait) {
-  body {
-    flex-direction: column;
-    height: 100vh;  /* fill viewport height */
-    margin: 0;
-  }
-  .sidebar {
-    width: 100%;
-    height: auto;
-    display: flex;
-    flex-wrap: nowrap;      /* no wrap, horizontal scrolling if needed */
-    overflow-x: auto;
-    gap: 10px;
-    padding: 10px;
-    border-right: none;
-    border-bottom: 1px solid #ddd;
-    justify-content: flex-start;
-    align-items: center;
-  }
-  .sidebar h1 {
-    flex: 0 0 auto;
-    margin-right: 15px;
-    white-space: nowrap;
-  }
-  .sidebar button,
-  .sidebar input[type="file"],
-  #instructionsBox {
-    flex: 0 0 auto;
-    white-space: nowrap;
-    margin: 0 5px;
-  }
-  main {
-    flex: 1 1 auto;
-    width: 100%;
-    height: calc(100vh - 70px); /* leave space for top bar */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-  }
-  canvas {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    display: block;
-  }
-}
-
-/* Small devices (phones) in landscape mode */
-@media (max-width: 767px) and (orientation: landscape) {
-  body {
-    flex-direction: row;
-  }
-  .sidebar {
-    width: 260px;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    border-right: 1px solid #ddd;
-    border-bottom: none;
-  }
-  main {
-    flex: 1;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  canvas {
-    max-width: 100%;
-    max-height: 100vh;
-  }
-}
-
-{
+* {
   box-sizing: border-box;
 }
-body {
-  margin: 0;
+
+html, body {
+  margin: 0; padding: 0;
+  height: 100%;
+  width: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #f4f6f8;
-  display: flex;
-  height: 100vh;
   overflow: hidden;
 }
+
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
 .sidebar {
   background: white;
   width: 260px;
@@ -100,6 +29,7 @@ body {
   flex-direction: column;
   overflow-y: auto;
 }
+
 .sidebar h1 {
   margin-top: 0;
   margin-bottom: 20px;
@@ -107,11 +37,13 @@ body {
   text-align: center;
   color: #333;
 }
+
 .sidebar label {
   font-weight: 600;
   margin-top: 10px;
   display: block;
 }
+
 .sidebar input[type="file"],
 .sidebar textarea {
   width: 100%;
@@ -119,11 +51,13 @@ body {
   margin-bottom: 15px;
   font-size: 14px;
 }
+
 .sidebar textarea {
   height: 70px;
   resize: vertical;
   padding: 6px;
 }
+
 .btn {
   padding: 10px;
   margin: 5px 0;
@@ -163,9 +97,11 @@ body {
   background-color: #6c757d;
   margin-top: 15px;
 }
+
 #instructionsBox {
   margin-top: 20px;
 }
+
 #addInstructionsBtn {
   background-color: #007bff;
   margin-top: 5px;
@@ -173,6 +109,22 @@ body {
 #addInstructionsBtn:hover {
   background-color: #0056b3;
 }
+
+h2 {
+  margin-top: 30px;
+  font-size: 20px;
+  color: #222;
+}
+
+#markerList {
+  list-style: none;
+  padding-left: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
 main {
   flex: 1;
   display: flex;
@@ -181,27 +133,95 @@ main {
   background: #e9ecef;
   padding: 15px;
   overflow: auto;
+  position: relative;
 }
+
 canvas {
   border: 3px solid #333;
   background: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   max-width: 100%;
+  max-height: 100%;
   height: auto;
   cursor: crosshair;
   user-select: none;
 }
-.marker-label {
-  position: absolute;
-  font-weight: 700;
-  font-size: 14px;
-  padding: 2px 6px;
-  border-radius: 12px;
+
+/* === Landscape lock & rotate container on small portrait devices === */
+@media (max-width: 767px) and (orientation: portrait) {
+  .container {
+    /* Rotate whole app 90deg to simulate landscape */
+    transform: rotate(90deg);
+    transform-origin: top left;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100vh;
+    height: 100vw;
+    display: flex;
+  }
+  body, html {
+    overflow: hidden;
+  }
+  /* Sidebar horizontal at top */
+  .sidebar {
+    width: 100vh;
+    height: 80px;
+    padding: 10px 5px;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .sidebar h1 {
+    flex: 0 0 auto;
+    margin: 0 10px 0 0;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+  .sidebar label,
+  .sidebar input[type="file"],
+  .btn,
+  #instructionsBox,
+  #markerList,
+  h2 {
+    flex: 0 0 auto;
+    margin: 0 8px;
+    white-space: nowrap;
+  }
+  #instructionsBox {
+    display: flex;
+    flex-direction: column;
+    max-width: 300px;
+  }
+  #markerList {
+    max-height: 60px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+  }
+  main {
+    flex: 1;
+    height: calc(100vw - 80px);
+    padding: 10px;
+  }
+}
+
+/* Rotate warning message */
+.rotate-warning {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: #dc3545;
   color: white;
-  pointer-events: none;
+  font-weight: bold;
+  text-align: center;
+  padding: 12px;
+  z-index: 10000;
+  display: none;
   user-select: none;
-  text-shadow: 0 0 3px rgba(0,0,0,0.7);
-  transform: translate(-50%, -50%);
-  white-space: nowrap;
-  z-index: 10;
+}
+.rotate-warning.visible {
+  display: block;
 }
