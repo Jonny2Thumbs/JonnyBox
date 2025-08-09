@@ -11,10 +11,10 @@ const addInstructionsBtn = document.getElementById('addInstructionsBtn');
 
 const markerList = document.getElementById('markerList');
 const sidebar = document.querySelector('.sidebar');
-const container = document.querySelector('.container');
-const rotateWarning = document.querySelector('.rotate-warning');
 
 const modeButtons = document.querySelectorAll('.btn[data-mode]');
+const container = document.querySelector('body');  // container for rotate warning display control
+const rotateWarning = document.getElementById('rotateWarning');
 
 let image = new Image();
 let currentMode = 'screw';
@@ -34,23 +34,6 @@ let markers = [];
 let drawing = false;
 let currentPath = [];
 
-// Helpers for pointer position (mouse or touch)
-function getPointerPos(evt) {
-  const rect = canvas.getBoundingClientRect();
-  let clientX, clientY;
-  if (evt.touches && evt.touches.length) {
-    clientX = evt.touches[0].clientX;
-    clientY = evt.touches[0].clientY;
-  } else {
-    clientX = evt.clientX;
-    clientY = evt.clientY;
-  }
-  return {
-    x: clientX - rect.left,
-    y: clientY - rect.top
-  };
-}
-
 function resetCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (image.src) {
@@ -58,23 +41,26 @@ function resetCanvas() {
   }
 }
 
+// Draw all markers on canvas
 function redrawMarkers() {
   resetCanvas();
 
   markers.forEach(marker => {
     if (marker.type === 'screw' || marker.type === 'bolt') {
+      // draw circle with color and number
       ctx.fillStyle = colorForType(marker.type);
       ctx.beginPath();
       const pt = marker.points[0];
       ctx.arc(pt.x, pt.y, 10, 0, Math.PI * 2);
       ctx.fill();
-
+      // number
       ctx.fillStyle = 'white';
       ctx.font = 'bold 14px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(marker.number, pt.x, pt.y);
     } else if (marker.type === 'component' || marker.type === 'custom') {
+      // draw freehand path
       ctx.strokeStyle = colorForType(marker.type);
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -85,6 +71,7 @@ function redrawMarkers() {
       ctx.closePath();
       ctx.stroke();
 
+      // number near first point
       ctx.fillStyle = colorForType(marker.type);
       ctx.font = 'bold 16px Arial';
       ctx.textAlign = 'left';
@@ -95,16 +82,18 @@ function redrawMarkers() {
   });
 }
 
+// Return color based on type
 function colorForType(type) {
   switch(type) {
-    case 'screw': return '#28a745';
-    case 'bolt': return '#dc3545';
-    case 'component': return '#007bff';
-    case 'custom': return '#ffc107';
+    case 'screw': return '#28a745';    // green
+    case 'bolt': return '#dc3545';     // red
+    case 'component': return '#007bff';// blue
+    case 'custom': return '#ffc107';   // goldenrod
     default: return '#000000';
   }
 }
 
+// Rebuild the steps list UI
 function rebuildMarkerList() {
   markerList.innerHTML = '';
   markers.forEach(marker => {
@@ -114,6 +103,7 @@ function rebuildMarkerList() {
   });
 }
 
+// Add new marker (point or freehand)
 function addMarker(type, points) {
   const number = counters[type]++;
   const marker = {
@@ -127,9 +117,19 @@ function addMarker(type, points) {
   redrawMarkers();
 }
 
+// Resize canvas to image size with max width/height constraints,
+// swapping width/height when rotated (portrait small screens)
 function resizeCanvasToImage() {
-  const maxWidth = window.innerWidth - 280; // leave space for sidebar + padding
-  const maxHeight = window.innerHeight - 40;
+  const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+  const isSmallScreen = window.matchMedia("(max-width: 767px)").matches;
+
+  let maxWidth = window.innerWidth - 280; // leave space for sidebar
+  let maxHeight = window.innerHeight - 40;
+
+  // Swap max width and height if rotated (portrait small screens)
+  if (isPortrait && isSmallScreen) {
+    [maxWidth, maxHeight] = [maxHeight, maxWidth];
+  }
 
   let w = image.width;
   let h = image.height;
@@ -143,30 +143,50 @@ function resizeCanvasToImage() {
     h = maxHeight;
   }
 
-  canvas.width = w;
-  canvas.height = h;
+  // Swap canvas dimensions for rotated mode
+  if (isPortrait && isSmallScreen) {
+    canvas.width = h;
+    canvas.height = w;
+  } else {
+    canvas.width = w;
+    canvas.height = h;
+  }
   redrawMarkers();
 }
 
-function checkOrientationAndWarn() {
+// Get pointer position with rotation adjustment
+function getPointerPos(evt) {
+  const rect = canvas.getBoundingClientRect();
+  let clientX, clientY;
+  if (evt.touches && evt.touches.length) {
+    clientX = evt.touches[0].clientX;
+    clientY = evt.touches[0].clientY;
+  } else {
+    clientX = evt.clientX;
+    clientY = evt.clientY;
+  }
+
   const isPortrait = window.matchMedia("(orientation: portrait)").matches;
   const isSmallScreen = window.matchMedia("(max-width: 767px)").matches;
 
-  // Only show warning if small screen and portrait
   if (isPortrait && isSmallScreen) {
-    rotateWarning.classList.add('visible');
-    container.style.display = 'none';
+    // Adjust coordinates for 90deg rotation clockwise of container
+    let rotatedX = clientY - rect.top;
+    let rotatedY = canvas.width - (clientX - rect.left);
+
+    rotatedX = Math.max(0, Math.min(rotatedX, canvas.width));
+    rotatedY = Math.max(0, Math.min(rotatedY, canvas.height));
+
+    return { x: rotatedX, y: rotatedY };
   } else {
-    rotateWarning.classList.remove('visible');
-    container.style.display = 'flex';
-    if (image.src) {
-      resizeCanvasToImage();
-    }
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
   }
 }
 
-// Event Listeners
-
+// Event: Load image from file input
 uploadImage.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -183,6 +203,7 @@ uploadImage.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
+// Event: Select mode button
 modeButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     currentMode = btn.getAttribute('data-mode');
@@ -191,33 +212,35 @@ modeButtons.forEach(btn => {
   });
 });
 
-// Drawing (mouse + touch)
-
-function pointerDownHandler(e) {
+// Drawing handlers
+canvas.addEventListener('mousedown', (e) => {
   if (!image.src) return;
 
-  e.preventDefault();
   drawing = true;
   currentPath = [];
 
   const pos = getPointerPos(e);
+  const x = pos.x;
+  const y = pos.y;
+
   if (currentMode === 'screw' || currentMode === 'bolt') {
-    addMarker(currentMode, [{ x: pos.x, y: pos.y }]);
+    addMarker(currentMode, [{ x, y }]);
     drawing = false;
   } else {
-    currentPath.push({ x: pos.x, y: pos.y });
+    currentPath.push({ x, y });
   }
-}
-function pointerMoveHandler(e) {
+});
+
+canvas.addEventListener('mousemove', (e) => {
   if (!drawing) return;
   if (!image.src) return;
 
-  e.preventDefault();
   if (currentMode === 'component' || currentMode === 'custom') {
     const pos = getPointerPos(e);
     currentPath.push({ x: pos.x, y: pos.y });
     redrawMarkers();
 
+    // Draw current path in-progress
     ctx.strokeStyle = colorForType(currentMode);
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -227,8 +250,9 @@ function pointerMoveHandler(e) {
     });
     ctx.stroke();
   }
-}
-function pointerUpHandler(e) {
+});
+
+canvas.addEventListener('mouseup', (e) => {
   if (!drawing) return;
   drawing = false;
 
@@ -238,19 +262,64 @@ function pointerUpHandler(e) {
     }
     currentPath = [];
   }
-}
+});
 
-canvas.addEventListener('mousedown', pointerDownHandler);
-canvas.addEventListener('mousemove', pointerMoveHandler);
-canvas.addEventListener('mouseup', pointerUpHandler);
-canvas.addEventListener('mouseout', pointerUpHandler);
+// Touch support for drawing
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  if (!image.src) return;
 
-// Touch support
-canvas.addEventListener('touchstart', pointerDownHandler, { passive: false });
-canvas.addEventListener('touchmove', pointerMoveHandler, { passive: false });
-canvas.addEventListener('touchend', pointerUpHandler);
-canvas.addEventListener('touchcancel', pointerUpHandler);
+  drawing = true;
+  currentPath = [];
 
+  const pos = getPointerPos(e);
+  const x = pos.x;
+  const y = pos.y;
+
+  if (currentMode === 'screw' || currentMode === 'bolt') {
+    addMarker(currentMode, [{ x, y }]);
+    drawing = false;
+  } else {
+    currentPath.push({ x, y });
+  }
+});
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  if (!drawing) return;
+  if (!image.src) return;
+
+  if (currentMode === 'component' || currentMode === 'custom') {
+    const pos = getPointerPos(e);
+    currentPath.push({ x: pos.x, y: pos.y });
+    redrawMarkers();
+
+    // Draw current path in-progress
+    ctx.strokeStyle = colorForType(currentMode);
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    currentPath.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    ctx.stroke();
+  }
+});
+
+canvas.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  if (!drawing) return;
+  drawing = false;
+
+  if (currentMode === 'component' || currentMode === 'custom') {
+    if (currentPath.length > 2) {
+      addMarker(currentMode, currentPath);
+    }
+    currentPath = [];
+  }
+});
+
+// Add instructions to last marker
 addInstructionsBtn.addEventListener('click', () => {
   if (markers.length === 0) {
     alert('No markers yet to add instructions!');
@@ -269,7 +338,6 @@ addInstructionsBtn.addEventListener('click', () => {
 });
 
 const undoBtn = document.getElementById('undoBtn');
-
 undoBtn.addEventListener('click', () => {
   if (markers.length === 0) {
     alert('No steps to undo!');
@@ -277,6 +345,7 @@ undoBtn.addEventListener('click', () => {
   }
 
   const removed = markers.pop();
+
   if (counters[removed.type] > 1) {
     counters[removed.type]--;
   }
@@ -285,6 +354,7 @@ undoBtn.addEventListener('click', () => {
   redrawMarkers();
 });
 
+// Export markers and image info as JSON
 exportBtn.addEventListener('click', () => {
   if (!image.src) {
     alert('Please load an image first.');
@@ -311,6 +381,7 @@ exportBtn.addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
+// Import markers and image info from JSON
 importFile.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -340,16 +411,33 @@ importFile.addEventListener('change', (e) => {
   reader.readAsText(file);
 });
 
-// Select screw mode by default on load
+// Initialize: select screw mode by default
 document.querySelector('.btn[data-mode="screw"]').classList.add('active');
+
+// Check orientation and show/hide warning and container
+function checkOrientationAndWarn() {
+  const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+  const isSmallScreen = window.matchMedia("(max-width: 767px)").matches;
+
+  if (isPortrait && isSmallScreen) {
+    rotateWarning.classList.add('visible');
+    container.style.display = 'none';
+  } else {
+    rotateWarning.classList.remove('visible');
+    container.style.display = 'flex';
+    if (image.src) {
+      resizeCanvasToImage();
+    }
+  }
+}
 
 window.addEventListener('resize', checkOrientationAndWarn);
 window.addEventListener('orientationchange', checkOrientationAndWarn);
+
+// Initial check
+checkOrientationAndWarn();
 
 image.onload = function () {
   resizeCanvasToImage();
   redrawMarkers();
 };
-
-checkOrientationAndWarn();
-
