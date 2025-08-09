@@ -152,6 +152,7 @@ function checkOrientationAndWarn() {
   const isPortrait = window.matchMedia("(orientation: portrait)").matches;
   const isSmallScreen = window.matchMedia("(max-width: 767px)").matches;
 
+  // Only show warning if small screen and portrait
   if (isPortrait && isSmallScreen) {
     rotateWarning.classList.add('visible');
     container.style.display = 'none';
@@ -351,3 +352,4 @@ image.onload = function () {
 };
 
 checkOrientationAndWarn();
+
