@@ -11,6 +11,8 @@ const addInstructionsBtn = document.getElementById('addInstructionsBtn');
 
 const markerList = document.getElementById('markerList');
 const sidebar = document.querySelector('.sidebar');
+const container = document.querySelector('.container');
+const rotateWarning = document.querySelector('.rotate-warning');
 
 const modeButtons = document.querySelectorAll('.btn[data-mode]');
 
@@ -32,6 +34,23 @@ let markers = [];
 let drawing = false;
 let currentPath = [];
 
+// Helpers for pointer position (mouse or touch)
+function getPointerPos(evt) {
+  const rect = canvas.getBoundingClientRect();
+  let clientX, clientY;
+  if (evt.touches && evt.touches.length) {
+    clientX = evt.touches[0].clientX;
+    clientY = evt.touches[0].clientY;
+  } else {
+    clientX = evt.clientX;
+    clientY = evt.clientY;
+  }
+  return {
+    x: clientX - rect.left,
+    y: clientY - rect.top
+  };
+}
+
 function resetCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (image.src) {
@@ -39,26 +58,23 @@ function resetCanvas() {
   }
 }
 
-// Draw all markers on canvas
 function redrawMarkers() {
   resetCanvas();
 
   markers.forEach(marker => {
     if (marker.type === 'screw' || marker.type === 'bolt') {
-      // draw circle with color and number
       ctx.fillStyle = colorForType(marker.type);
       ctx.beginPath();
       const pt = marker.points[0];
       ctx.arc(pt.x, pt.y, 10, 0, Math.PI * 2);
       ctx.fill();
-      // number
+
       ctx.fillStyle = 'white';
       ctx.font = 'bold 14px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(marker.number, pt.x, pt.y);
     } else if (marker.type === 'component' || marker.type === 'custom') {
-      // draw freehand path
       ctx.strokeStyle = colorForType(marker.type);
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -69,7 +85,6 @@ function redrawMarkers() {
       ctx.closePath();
       ctx.stroke();
 
-      // number near first point
       ctx.fillStyle = colorForType(marker.type);
       ctx.font = 'bold 16px Arial';
       ctx.textAlign = 'left';
@@ -80,18 +95,16 @@ function redrawMarkers() {
   });
 }
 
-// Return color based on type
 function colorForType(type) {
   switch(type) {
-    case 'screw': return '#28a745';    // green
-    case 'bolt': return '#dc3545';     // red
-    case 'component': return '#007bff';// blue
-    case 'custom': return '#ffc107';   // goldenrod
+    case 'screw': return '#28a745';
+    case 'bolt': return '#dc3545';
+    case 'component': return '#007bff';
+    case 'custom': return '#ffc107';
     default: return '#000000';
   }
 }
 
-// Rebuild the steps list UI
 function rebuildMarkerList() {
   markerList.innerHTML = '';
   markers.forEach(marker => {
@@ -101,7 +114,6 @@ function rebuildMarkerList() {
   });
 }
 
-// Add new marker (point or freehand)
 function addMarker(type, points) {
   const number = counters[type]++;
   const marker = {
@@ -115,9 +127,8 @@ function addMarker(type, points) {
   redrawMarkers();
 }
 
-// Resize canvas to image size with max width/height constraints
 function resizeCanvasToImage() {
-  const maxWidth = window.innerWidth - 300; // leave space for sidebar
+  const maxWidth = window.innerWidth - 280; // leave space for sidebar + padding
   const maxHeight = window.innerHeight - 40;
 
   let w = image.width;
@@ -137,7 +148,24 @@ function resizeCanvasToImage() {
   redrawMarkers();
 }
 
-// Event: Load image from file input
+function checkOrientationAndWarn() {
+  const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+  const isSmallScreen = window.matchMedia("(max-width: 767px)").matches;
+
+  if (isPortrait && isSmallScreen) {
+    rotateWarning.classList.add('visible');
+    container.style.display = 'none';
+  } else {
+    rotateWarning.classList.remove('visible');
+    container.style.display = 'flex';
+    if (image.src) {
+      resizeCanvasToImage();
+    }
+  }
+}
+
+// Event Listeners
+
 uploadImage.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -154,7 +182,6 @@ uploadImage.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-// Event: Select mode button
 modeButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     currentMode = btn.getAttribute('data-mode');
@@ -163,39 +190,33 @@ modeButtons.forEach(btn => {
   });
 });
 
-// Drawing handlers
-canvas.addEventListener('mousedown', (e) => {
-  if (!image.src) return; // no image loaded, ignore
+// Drawing (mouse + touch)
 
+function pointerDownHandler(e) {
+  if (!image.src) return;
+
+  e.preventDefault();
   drawing = true;
   currentPath = [];
 
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
+  const pos = getPointerPos(e);
   if (currentMode === 'screw' || currentMode === 'bolt') {
-    // For point types, just add marker immediately
-    addMarker(currentMode, [{ x, y }]);
+    addMarker(currentMode, [{ x: pos.x, y: pos.y }]);
     drawing = false;
   } else {
-    // For freehand types start path
-    currentPath.push({ x, y });
+    currentPath.push({ x: pos.x, y: pos.y });
   }
-});
-
-canvas.addEventListener('mousemove', (e) => {
+}
+function pointerMoveHandler(e) {
   if (!drawing) return;
   if (!image.src) return;
 
+  e.preventDefault();
   if (currentMode === 'component' || currentMode === 'custom') {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    currentPath.push({ x, y });
+    const pos = getPointerPos(e);
+    currentPath.push({ x: pos.x, y: pos.y });
     redrawMarkers();
 
-    // Draw current path in-progress
     ctx.strokeStyle = colorForType(currentMode);
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -205,9 +226,8 @@ canvas.addEventListener('mousemove', (e) => {
     });
     ctx.stroke();
   }
-});
-
-canvas.addEventListener('mouseup', (e) => {
+}
+function pointerUpHandler(e) {
   if (!drawing) return;
   drawing = false;
 
@@ -217,9 +237,19 @@ canvas.addEventListener('mouseup', (e) => {
     }
     currentPath = [];
   }
-});
+}
 
-// Add instructions to last marker
+canvas.addEventListener('mousedown', pointerDownHandler);
+canvas.addEventListener('mousemove', pointerMoveHandler);
+canvas.addEventListener('mouseup', pointerUpHandler);
+canvas.addEventListener('mouseout', pointerUpHandler);
+
+// Touch support
+canvas.addEventListener('touchstart', pointerDownHandler, { passive: false });
+canvas.addEventListener('touchmove', pointerMoveHandler, { passive: false });
+canvas.addEventListener('touchend', pointerUpHandler);
+canvas.addEventListener('touchcancel', pointerUpHandler);
+
 addInstructionsBtn.addEventListener('click', () => {
   if (markers.length === 0) {
     alert('No markers yet to add instructions!');
@@ -236,6 +266,7 @@ addInstructionsBtn.addEventListener('click', () => {
   alert(`Instructions added to step #${lastMarker.number} (${lastMarker.type})`);
   instructionsInput.value = '';
 });
+
 const undoBtn = document.getElementById('undoBtn');
 
 undoBtn.addEventListener('click', () => {
@@ -244,19 +275,15 @@ undoBtn.addEventListener('click', () => {
     return;
   }
 
-  // Remove last marker
   const removed = markers.pop();
-
-  // Decrement the counter for that type
   if (counters[removed.type] > 1) {
     counters[removed.type]--;
   }
 
-  // Update UI and redraw
   rebuildMarkerList();
   redrawMarkers();
 });
-// Export markers and image info as JSON
+
 exportBtn.addEventListener('click', () => {
   if (!image.src) {
     alert('Please load an image first.');
@@ -283,7 +310,6 @@ exportBtn.addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
-// Import markers and image info from JSON
 importFile.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -313,37 +339,15 @@ importFile.addEventListener('change', (e) => {
   reader.readAsText(file);
 });
 
-// Initialize: select screw mode by default
+// Select screw mode by default on load
 document.querySelector('.btn[data-mode="screw"]').classList.add('active');
 
-function resizeCanvasToImageMobile() {
-  if (!image.src) return;
-
-  const sidebar = document.querySelector('.sidebar');
-  const availableWidth = window.innerWidth - (sidebar ? sidebar.offsetWidth : 0) - 20;
-  const availableHeight = window.innerHeight - 20;
-
-  let w = image.width;
-  let h = image.height;
-
-  if (w > availableWidth) {
-    h = h * (availableWidth / w);
-    w = availableWidth;
-  }
-  if (h > availableHeight) {
-    w = w * (availableHeight / h);
-    h = availableHeight;
-  }
-
-  canvas.width = w;
-  canvas.height = h;
-  redrawMarkers();
-}
-
-window.addEventListener('resize', resizeCanvasToImageMobile);
-window.addEventListener('orientationchange', resizeCanvasToImageMobile);
+window.addEventListener('resize', checkOrientationAndWarn);
+window.addEventListener('orientationchange', checkOrientationAndWarn);
 
 image.onload = function () {
-  resizeCanvasToImageMobile();
+  resizeCanvasToImage();
   redrawMarkers();
 };
+
+checkOrientationAndWarn();
