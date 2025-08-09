@@ -2,42 +2,47 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Jonny Box - Disassembly Tracker</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="sidebar">
-    <h1>Jonny Box</h1>
-
-    <label for="uploadImage">Choose Image:</label>
-    <input type="file" id="uploadImage" accept="image/*" />
-
-    <label for="importFile">Load Project (JSON):</label>
-    <input type="file" id="importFile" accept=".json" />
-
-    <button class="btn screw-btn" data-mode="screw">Screw/Nut (Small)</button>
-    <button class="btn bolt-btn" data-mode="bolt">Bolt</button>
-    <button class="btn component-btn" data-mode="component">Component</button>
-    <button class="btn custom-btn" data-mode="custom">Custom</button>
-    <button class="btn undo-btn" id="undoBtn">Undo Last Step</button>
-    <button class="btn export-btn" id="exportBtn">Export Project</button>
-
-    <div id="instructionsBox">
-      <label for="instructionsInput">Add Instructions to Last Step:</label>
-      <textarea id="instructionsInput" placeholder="Type instructions here..."></textarea>
-      <button id="addInstructionsBtn">Add Instructions</button>
-    </div>
-
-    <h2>Steps</h2>
-    <ul id="markerList"></ul>
+  <div class="rotate-warning hidden">
+    Please rotate your device to landscape for best experience.
   </div>
 
-  <main>
-    <canvas id="canvas" width="800" height="600"></canvas>
-  </main>
+  <div class="container">
+    <div class="sidebar">
+      <h1>Jonny Box</h1>
 
-  <script src="app.js"></script>
+      <label for="uploadImage">Choose Image:</label>
+      <input type="file" id="uploadImage" accept="image/*" />
+
+      <label for="importFile">Load Project (JSON):</label>
+      <input type="file" id="importFile" accept=".json" />
+
+      <button class="btn screw-btn" data-mode="screw">Screw/Nut (Small)</button>
+      <button class="btn bolt-btn" data-mode="bolt">Bolt</button>
+      <button class="btn component-btn" data-mode="component">Component</button>
+      <button class="btn custom-btn" data-mode="custom">Custom</button>
+      <button class="btn undo-btn" id="undoBtn">Undo Last Step</button>
+      <button class="btn export-btn" id="exportBtn">Export Project</button>
+
+      <div id="instructionsBox">
+        <label for="instructionsInput">Add Instructions to Last Step:</label>
+        <textarea id="instructionsInput" placeholder="Type instructions here..."></textarea>
+        <button id="addInstructionsBtn">Add Instructions</button>
+      </div>
+
+      <h2>Steps</h2>
+      <ul id="markerList"></ul>
+    </div>
+
+    <main>
+      <canvas id="canvas" width="800" height="600"></canvas>
+    </main>
+  </div>
+
+<script src="app.js"></script>
 </body>
-
 </html>
