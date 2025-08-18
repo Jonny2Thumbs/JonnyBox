@@ -219,6 +219,65 @@ if (currentMode === 'component' || currentMode === 'custom') {
   }
 });
 
+// Helper to get touch position relative to canvas
+function getTouchPos(touchEvent) {
+  const rect = canvas.getBoundingClientRect();
+  const touch = touchEvent.touches[0] || touchEvent.changedTouches[0];
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+  return { x, y };
+}
+
+// Touch start
+canvas.addEventListener('touchstart', (e) => {
+  if (!image.src) return;
+  e.preventDefault(); // prevent scrolling
+  drawing = true;
+  currentPath = [];
+
+  const { x, y } = getTouchPos(e);
+
+  if (currentMode === 'screw' || currentMode === 'bolt') {
+    addMarker(currentMode, [{ x, y }]);
+    drawing = false;
+  } else {
+    currentPath.push({ x, y });
+  }
+}, { passive: false });
+
+// Touch move
+canvas.addEventListener('touchmove', (e) => {
+  if (!drawing) return;
+  e.preventDefault();
+  const { x, y } = getTouchPos(e);
+  currentPath.push({ x, y });
+  redrawMarkers();
+
+  if (currentMode === 'component' || currentMode === 'custom') {
+    ctx.strokeStyle = colorForType(currentMode);
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    currentPath.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    ctx.stroke();
+  }
+}, { passive: false });
+
+// Touch end
+canvas.addEventListener('touchend', (e) => {
+  if (!drawing) return;
+  drawing = false;
+  if (currentMode === 'component' || currentMode === 'custom') {
+    if (currentPath.length > 0) {
+      addMarker(currentMode, currentPath);
+    }
+    currentPath = [];
+  }
+}, { passive: false });
+
+
 // Add instructions to last marker
 addInstructionsBtn.addEventListener('click', () => {
   if (markers.length === 0) {
