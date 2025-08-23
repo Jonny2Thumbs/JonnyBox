@@ -44,33 +44,3 @@ main { flex:1; }
   main { order:1; flex:2; height:100%; }
   .sidebar { order:2; flex:1; height:100%; }
 }
-
-#canvasContainer {
-  position: relative;
-  max-width: 800px;
-  width: 100%;
-  height: 100vh;  /* fill vertical space */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#canvas {
-  width: 100%;
-  height: auto; /* maintain aspect ratio */
-}
-
-#welcomeText {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
-}
-
-.welcome-line {
-  display: block;   /* forces line break */
-  margin: 5px 0;    /* spacing */
-}
