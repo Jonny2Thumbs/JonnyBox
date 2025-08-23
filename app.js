@@ -219,28 +219,3 @@ uploadImage.addEventListener('change', e => {
   };
   reader.readAsDataURL(file);
 });
-
-// Hide welcome text when importing a project
-importFile.addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = evt => {
-    try {
-      const data = JSON.parse(evt.target.result);
-      image = new Image();
-      image.onload = () => {
-        document.getElementById('welcomeText').style.display = 'none';
-        canvas.width = data.canvasWidth || image.width;
-        canvas.height = data.canvasHeight || image.height;
-        counters = data.counters || { screw:1, bolt:1, component:1, custom:1 };
-        markers = data.markers || [];
-        redrawMarkers();
-        rebuildMarkerList();
-      };
-      image.src = data.imageSrc;
-    } catch(err) { alert('Error loading project: ' + err.message); }
-  };
-  reader.readAsText(file);
-});
