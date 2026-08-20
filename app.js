@@ -21,33 +21,37 @@ const instructionsBtn = document.getElementById('instructionsBtn');
 const instructionsModal = document.getElementById('instructionsModal');
 const instructionsCloseBtn = document.getElementById('instructionsCloseBtn');
 
-instructionsBtn.addEventListener('click', () => {
-  instructionsModal.hidden = false;
-});
+if (instructionsBtn && instructionsModal && instructionsCloseBtn) {
+  instructionsBtn.addEventListener('click', () => {
+    instructionsModal.hidden = false;
+  });
 
-instructionsCloseBtn.addEventListener('click', () => {
-  instructionsModal.hidden = true;
-});
-
-// Close if user clicks the dark overlay outside the box
-instructionsModal.addEventListener('click', (e) => {
-  if (e.target === instructionsModal) {
+  instructionsCloseBtn.addEventListener('click', () => {
     instructionsModal.hidden = true;
-  }
-});
+  });
 
-// Close on Escape key
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !instructionsModal.hidden) {
-    instructionsModal.hidden = true;
-  }
-});
+  // Close if user clicks the dark overlay outside the box
+  instructionsModal.addEventListener('click', (e) => {
+    if (e.target === instructionsModal) {
+      instructionsModal.hidden = true;
+    }
+  });
 
-// Optional: show automatically on first visit
-// if (!localStorage.getItem('jonnyBoxSeenInstructions')) {
-//   instructionsModal.hidden = false;
-//   localStorage.setItem('jonnyBoxSeenInstructions', 'true');
-// }
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !instructionsModal.hidden) {
+      instructionsModal.hidden = true;
+    }
+  });
+
+  // Optional: show automatically on first visit
+  // if (!localStorage.getItem('jonnyBoxSeenInstructions')) {
+  //   instructionsModal.hidden = false;
+  //   localStorage.setItem('jonnyBoxSeenInstructions', 'true');
+  // }
+} else {
+  console.warn('Instructions popup elements not found in the DOM — skipping popup setup.');
+}
 
 
 // State
