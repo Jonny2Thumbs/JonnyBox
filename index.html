@@ -22,6 +22,7 @@
     <button class="btn custom-btn" data-mode="custom">Custom</button>
     <button class="btn undo-btn" id="undoBtn">Undo Last Step</button>
     <button class="btn export-btn" id="exportBtn">Export Project</button>
+    <button class="btn" id="instructionsBtn">How to Use</button>
 
     <div id="instructionsBox">
       <label for="instructionsInput">Add Instructions to Last Step:</label>
@@ -50,18 +51,11 @@
     <canvas id="canvas" width="800" height="600"></canvas>
   </main>
 
-  <script src="app.js"></script>
   <!-- ============================================= -->
-<!-- 1. BUTTON — put this next to your other buttons -->
-<!-- (e.g. near Undo/Export, or above "Steps")        -->
-<!-- ============================================= -->
-<button id="instructionsBtn" class="btn">How to Use</button>
-
-
-<!-- ============================================= -->
-<!-- 2. MODAL — put this just before </body>          -->
-<!-- ============================================= -->
-<div id="instructionsModal" class="modal-overlay" hidden>
+  <!-- Instructions modal — must appear before app.js  -->
+  <!-- so the elements exist when the script runs      -->
+  <!-- ============================================= -->
+  <div id="instructionsModal" class="modal-overlay" hidden>
   <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="instructionsTitle">
     <button id="instructionsCloseBtn" class="modal-close" aria-label="Close">&times;</button>
 
@@ -100,5 +94,7 @@
     </p>
   </div>
 </div>
+
+<script src="app.js"></script>
 </body>
 </html>
