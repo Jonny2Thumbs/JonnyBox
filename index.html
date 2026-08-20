@@ -51,5 +51,54 @@
   </main>
 
   <script src="app.js"></script>
+  <!-- ============================================= -->
+<!-- 1. BUTTON — put this next to your other buttons -->
+<!-- (e.g. near Undo/Export, or above "Steps")        -->
+<!-- ============================================= -->
+<button id="instructionsBtn" class="btn">How to Use</button>
+
+
+<!-- ============================================= -->
+<!-- 2. MODAL — put this just before </body>          -->
+<!-- ============================================= -->
+<div id="instructionsModal" class="modal-overlay" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="instructionsTitle">
+    <button id="instructionsCloseBtn" class="modal-close" aria-label="Close">&times;</button>
+
+    <h2 id="instructionsTitle">🪛 Jonny Box — Quick Start</h2>
+
+    <h3>What You'll Need</h3>
+    <ul>
+      <li><strong>3-ring binder with numbered pockets</strong> — for screws and small components</li>
+      <li><strong>Tackle/tool box with numbered, removable dividers</strong> — for bolts and medium-sized components</li>
+      <li><strong>Numbered tags</strong> — to attach directly to larger components</li>
+    </ul>
+
+    <h3>1. Start a Project</h3>
+    <p><strong>Choose Image</strong> to upload a photo of the item you're disassembling, or <strong>Load Project (JSON)</strong> to resume a saved one.</p>
+
+    <h3>2. Log Each Part as You Remove It</h3>
+    <p>Click its location directly on the photo, then tag it:</p>
+    <ul>
+      <li><strong>Screw / small component</strong> → click the spot, place the part in the matching numbered binder pocket.</li>
+      <li><strong>Bolt / medium component</strong> → click the spot, place the part in the matching numbered tackle box compartment. If it doesn't fit, click twice to merge with the neighboring compartment, then remove the physical divider.</li>
+      <li><strong>Component (large)</strong> → click the spot, attach the matching numbered tag to the part.</li>
+      <li><strong>Custom</strong> → for anything else.</li>
+    </ul>
+
+    <h3>3. Add Notes</h3>
+    <p>Use <strong>Add Instructions to Last Step</strong> to attach a note to the most recent marker — great for odd screw lengths, orientation, or anything easy to forget.</p>
+
+    <h3>4. Undo / Save</h3>
+    <p><strong>Undo Last Step</strong> removes the most recent marker. <strong>Export Project</strong> saves your photo, markers, and notes as a JSON file you can reload later.</p>
+
+    <h3>5. Reassembling</h3>
+    <p>Work through the Steps list from the bottom up — each numbered point tells you exactly where the part goes. Match the number to its binder pocket, tackle box compartment, or tag.</p>
+
+    <p class="modal-footer">
+      <a href="https://youtu.be/fxeEBosA0Ok" target="_blank" rel="noopener noreferrer">Watch the video walkthrough</a>
+    </p>
+  </div>
+</div>
 </body>
 </html>
