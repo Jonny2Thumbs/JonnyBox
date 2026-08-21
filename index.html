@@ -16,10 +16,18 @@
     <label for="importFile">Load Project (JSON):</label>
     <input type="file" id="importFile" accept=".json" />
 
+    <label for="addPhotoInput">Add Another Photo:</label>
+    <input type="file" id="addPhotoInput" accept="image/*" />
+
     <button class="btn screw-btn" data-mode="screw">Screw</button>
     <button class="btn bolt-btn" data-mode="bolt">Bolt</button>
     <button class="btn component-btn" data-mode="component">Component</button>
     <button class="btn custom-btn" data-mode="custom">Custom</button>
+
+    <button class="btn repeat-btn" id="repeatBtn">Repeat Marker</button>
+    <select id="repeatDropdown" hidden></select>
+    <p id="repeatStatus" class="subtext"></p>
+
     <button class="btn undo-btn" id="undoBtn">Undo Last Step</button>
     <button class="btn export-btn" id="exportBtn">Export Project</button>
     <button class="btn instructions-btn" id="instructionsBtn">How to Use</button>
@@ -46,9 +54,15 @@
 </p>
   </div>
 
-  <!-- The welcome screen text is in the js file on line 27 -->  
   <main>
-    <canvas id="canvas" width="800" height="600"></canvas>
+    <div id="photoTabs" class="photo-tabs" hidden></div>
+    <div id="emptyState" class="empty-state">
+      <p class="empty-title">🪛 Welcome to Jonny Box! 🪛</p>
+      <p>The ultimate technician's assistant.</p>
+      <p>Choose an image or upload a project to begin.</p>
+      <p>© Jonathan Welch</p>
+    </div>
+    <canvas id="canvas" class="photo-canvas" width="800" height="600" hidden></canvas>
   </main>
 
   <!-- ============================================= -->
@@ -88,6 +102,12 @@
 
     <h3>5. Reassembling</h3>
     <p>Work through the Steps list from the bottom up — each numbered point tells you exactly where the part goes. Match the number to its binder pocket, tackle box compartment, or tag.</p>
+
+    <h3>6. Going Deeper (Multiple Photos)</h3>
+    <p>Use <strong>Add Another Photo</strong> to add a new photo as you dig further into the item (e.g. the internals after removing the case). Numbering continues across photos — it never restarts. Once you have more than one photo, tabs appear above the photo so you can click to switch between them.</p>
+
+    <h3>7. Repeat Marker</h3>
+    <p>If the same part appears in more than one spot or photo (e.g. Screw #6 shows up on two photos), click <strong>Repeat Marker</strong>, pick the number from the dropdown, then click anywhere on either photo to place that same number again — without disturbing your normal numbering sequence. Repeated markers are labeled with an "R" (e.g. "6R"). Click <strong>Repeat Marker</strong> again to turn it off.</p>
 
     <p class="modal-footer">
       <a href="https://youtu.be/fxeEBosA0Ok" target="_blank" rel="noopener noreferrer">Watch the video walkthrough</a>
