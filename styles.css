@@ -1,8 +1,7 @@
 * { box-sizing: border-box; margin:0; padding:0; }
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f4f6f8; }
 
-main { flex:1; display:flex; justify-content:center; align-items:center; background:#e9ecef; padding:10px; }
-canvas { max-width:100%; max-height:100%; border:3px solid #333; background:white; cursor:crosshair; }
+main { flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#e9ecef; padding:10px; gap:10px; overflow:hidden; }
 
 .sidebar {
   background:white;
@@ -20,10 +19,13 @@ canvas { max-width:100%; max-height:100%; border:3px solid #333; background:whit
 .screw-btn { background-color:#28a745; }
 .bolt-btn { background-color:#dc3545; }
 .component-btn { background-color:#007bff; }
-.custom-btn { background-color:#ffc107; }
+.custom-btn { background-color:#ffc107; color:#333; }
 .undo-btn { background-color:#17a2b8; }
 .export-btn { background-color:#6c757d; }
-.instructions-btn { background-color:#3e2173; }
+.repeat-btn { background-color:#8e44ad; }
+.instructions-btn { background-color:#3f495d; }
+.repeat-btn.active { outline: 3px solid #FF0000; outline-offset: -3px; }
+
 
 textarea { width:100%; height:70px; resize:vertical; padding:5px; margin-bottom:6px; }
 
@@ -113,4 +115,105 @@ main { flex:1; }
 .modal-footer {
   margin-top: 20px;
   font-weight: bold;
+}
+
+/* ============================================= */
+/* Photo tabs — shown above the canvas once a     */
+/* project has more than one photo                */
+/* ============================================= */
+
+.photo-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.photo-tabs[hidden] {
+  display: none;
+}
+
+.photo-tab {
+  padding: 6px 14px;
+  border: 2px solid #6c757d;
+  background: white;
+  color: #333;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.photo-tab:hover {
+  background: #f1f1f1;
+}
+
+/* ============================================= */
+/* Single photo canvas — swapped via the tabs      */
+/* above it                                         */
+/* ============================================= */
+
+.photo-canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  border: 3px solid #333;
+  background: white;
+  cursor: crosshair;
+}
+
+.photo-canvas[hidden] {
+  display: none;
+}
+
+.empty-state {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  color: #555;
+  text-align: center;
+}
+
+.empty-state[hidden] {
+  display: none;
+}
+
+.empty-title {
+  font-size: 1.8em;
+  margin-bottom: 4px;
+}
+
+.photo-tab.active {
+  background: #6c757d;
+  color: white;
+}
+
+/* ============================================= */
+/* Repeat Marker dropdown + status text            */
+/* ============================================= */
+
+#repeatDropdown {
+  width: 100%;
+  padding: 6px;
+  margin-bottom: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#repeatDropdown[hidden] {
+  display: none;
+}
+
+#repeatStatus {
+  color: #8e44ad;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+#repeatStatus:empty {
+  margin-bottom: 0;
 }
